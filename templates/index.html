@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Recommendation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .requirement-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .preview-container {
+            background-color: #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .requirement-status {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            gap: 5px;
+        }
+        .badge-required {
+            background-color: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        .badge-optional {
+            background-color: #6c757d;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        .badge-provided {
+            background-color: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        .question-container {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .result-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        .attempt-counter {
+            font-size: 14px;
+            color: #6c757d;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Insurance Recommendation System</h1>
+        
+        <div class="row">
+            <div class="col-md-10 mx-auto">
+                <!-- Requirements Gathering Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Company Requirements Gathering</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Requirement Status -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">Required Information:</h6>
+                            <span id="attempt-counter" class="attempt-counter">Attempts: 0/5</span>
+                        </div>
+                        
+                        <div class="requirement-status mb-3">
+                            <span id="category-Company-size-employee-count" class="badge-required">Company Size</span>
+                            <span id="category-Industry-business-type" class="badge-required">Industry</span>
+                            <span id="category-Annual-revenue" class="badge-required">Revenue</span>
+                            <span id="category-Risk-profile-concerns" class="badge-required">Risk Profile</span>
+                            <span id="category-Budget-constraints" class="badge-required">Budget</span>
+                            <span id="category-Country-of-the-company" class="badge-optional">Country</span>
+                            <span id="category-Crypto-coverage-needs" class="badge-optional">Crypto</span>
+                            <span id="category-Preferred-grace-period-days-for-new-subsidiary-cover" class="badge-optional">Grace Period</span>
+                        </div>
+
+                        <!-- Current Question -->
+                        <div id="current-question" class="question-container">
+                            Please provide information about your company. We need details such as company size, industry, annual revenue, risk concerns, and budget constraints.
+                        </div>
+                        
+                        <!-- Requirements Input -->
+                        <div class="mb-3">
+                            <label for="requirements-input" class="form-label">Your Input:</label>
+                            <textarea id="requirements-input" class="form-control" rows="3" placeholder="Example: We are a small tech company with 30 employees, $2M annual revenue, concerned about cyber attacks, with a $15K budget for insurance."></textarea>
+                        </div>
+                        
+                        <button id="update-btn" class="btn btn-primary mb-3">Update Requirements</button>
+                        
+                        <!-- Requirements Preview -->
+                        <div class="mb-3">
+                            <label for="requirements-preview" class="form-label">Requirements Summary:</label>
+                            <div id="requirements-preview" class="preview-container">
+                                No requirements provided yet.
+                            </div>
+                        </div>
+
+                        <!-- Search and Recommend Button -->
+                        <div class="text-center">
+                            <button id="recommend-btn" class="btn btn-success btn-lg" disabled>Generate Insurance Recommendation</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results Section -->
+                <div id="results-section" class="card mb-4" style="display: none;">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Insurance Recommendation</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recommendation-content" class="p-3 bg-light rounded mb-3"></div>
+                        <div class="text-muted small">
+                            <span id="chunk-count"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Direct Search Section -->
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Direct Policy Search</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <input type="text" id="search-input" class="form-control" placeholder="Search for specific policies...">
+                            <button id="search-btn" class="btn btn-secondary">Search</button>
+                        </div>
+                        <div id="search-results">
+                            <!-- Search results will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Store the company information
+        let companyInfo = [];
+        let attempts = 0;
+        const maxAttempts = 5;
+        let detectedCategories = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update button event
+            document.getElementById('update-btn').addEventListener('click', updateRequirements);
+            
+            // Enter key in input field
+            document.getElementById('requirements-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    updateRequirements();
+                }
+            });
+            
+            // Recommend button event
+            document.getElementById('recommend-btn').addEventListener('click', generateRecommendation);
+            
+            // Search button event
+            document.getElementById('search-btn').addEventListener('click', searchDocuments);
+        });
+        
+        function updateRequirements() {
+            if (attempts >= maxAttempts) {
+                alert("You've reached the maximum number of attempts. Please generate a recommendation with the current information.");
+                return;
+            }
+            
+            const input = document.getElementById('requirements-input').value.trim();
+            if (input === '') {
+                alert("Please provide some information about your company.");
+                return;
+            }
+            
+            // Increment attempt counter
+            attempts++;
+            document.getElementById('attempt-counter').textContent = `Attempts: ${attempts}/${maxAttempts}`;
+            
+            // Add to company info array
+            companyInfo.push(input);
+            
+            // Call the server to process input
+            fetch('/update_requirements', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    input: input,
+                    current_info: companyInfo 
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                // Update detected categories
+                detectedCategories = data.all_detected_categories;
+                
+                // Update category badges
+                updateCategoryBadges(detectedCategories);
+                
+                // Update next question
+                document.getElementById('current-question').textContent = data.next_question;
+                
+                // Update profile preview
+                document.getElementById('requirements-preview').textContent = data.profile;
+                
+                // Check if all required categories are collected or max attempts reached
+                if (data.completed || attempts >= maxAttempts) {
+                    document.getElementById('recommend-btn').disabled = false;
+                }
+                
+                // Clear input field
+                document.getElementById('requirements-input').value = '';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating requirements.');
+            });
+        }
+        
+        function updateCategoryBadges(detectedCategories) {
+            // Get all category elements
+            const categoryElements = document.querySelectorAll('[id^="category-"]');
+            
+            // For each category element
+            categoryElements.forEach(element => {
+                // Get the category name from the element ID
+                const categoryId = element.id.replace('category-', '');
+                const categoryName = categoryId.replace(/-/g, ' ');
+                
+                // Check if this category is in the detected categories
+                if (detectedCategories.includes(categoryName)) {
+                    element.className = 'badge-provided';
+                }
+            });
+        }
+        
+        function generateRecommendation() {
+            if (companyInfo.length === 0) {
+                alert("Please provide some company information first.");
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('recommend-btn').disabled = true;
+            document.getElementById('recommend-btn').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+            
+            // Send company info to server
+            fetch('/generate_recommendation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ company_info: companyInfo }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Restore button state
+                document.getElementById('recommend-btn').disabled = false;
+                document.getElementById('recommend-btn').textContent = 'Generate Insurance Recommendation';
+                
+                if (data.recommendation) {
+                    // Show results section
+                    document.getElementById('results-section').style.display = 'block';
+                    
+                    // Update recommendation content
+                    document.getElementById('recommendation-content').innerHTML = data.recommendation;
+                    document.getElementById('chunk-count').textContent = `Based on ${data.chunk_count || 0} retrieved document chunks`;
+                    
+                    // Scroll to results
+                    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+                } else if (data.error) {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('recommend-btn').disabled = false;
+                document.getElementById('recommend-btn').textContent = 'Generate Insurance Recommendation';
+                alert('An error occurred while generating the recommendation. Please try again.');
+            });
+        }
+        
+        function searchDocuments() {
+            const query = document.getElementById('search-input').value.trim();
+            const resultsContainer = document.getElementById('search-results');
+            
+            if (query === '') {
+                resultsContainer.innerHTML = '<div class="alert alert-warning">Please enter a search query.</div>';
+                return;
+            }
+            
+            resultsContainer.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+            
+            fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultsContainer.innerHTML = '';
+                
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach(result => {
+                        const resultDiv = document.createElement('div');
+                        resultDiv.className = 'result-item';
+                        
+                        // Display highlighted content if available
+                        if (result.highlighted_content) {
+                            resultDiv.innerHTML = result.highlighted_content;
+                        } else {
+                            resultDiv.textContent = result.content;
+                        }
+                        
+                        // Add source information
+                        const sourceDiv = document.createElement('div');
+                        sourceDiv.className = 'small text-muted mt-1';
+                        sourceDiv.textContent = `Source: ${result.source || 'Unknown'}`;
+                        resultDiv.appendChild(sourceDiv);
+                        
+                        resultsContainer.appendChild(resultDiv);
+                    });
+                } else {
+                    resultsContainer.innerHTML = '<div class="alert alert-info">No results found for your query.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultsContainer.innerHTML = '<div class="alert alert-danger">An error occurred during search.</div>';
+            });
+        }
+    </script>
+</body>
+</html>

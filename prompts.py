@@ -39,8 +39,11 @@ Your response must include:
 - POLICY RECOMMENDATIONS: List the specific names of recommended policies in order of priority
 - WHY THESE POLICIES: Brief explanation of why each policy is suitable for this client
 - COVERAGE HIGHLIGHTS: Key benefits and coverage amounts that address client needs
+- COST CONSIDERATIONS: How the recommended policies align with the client's budget constraints
 
-Keep your response concise and focused on actionable recommendations. Avoid lengthy explanations of policy details unless directly relevant to the client's needs."""
+Keep your response concise and focused on actionable recommendations. Avoid lengthy explanations of policy details unless directly relevant to the client's needs.
+
+Format your response in well-structured HTML with clear headings and bullet points for readability."""
 )
     
 profile_template = PromptTemplate(
@@ -49,6 +52,19 @@ profile_template = PromptTemplate(
 Based on the following collected information about a company:
 {collected_info}
 
+<think>
+Analyze all the information provided and extract key details about:
+- Company size (employee count)
+- Industry/business type
+- Annual revenue
+- Risk profile/concerns
+- Budget constraints
+- Country of the company (if mentioned)
+- Any special requirements like crypto coverage or grace period
+
+Make reasonable assumptions for missing information, noting them as assumptions.
+</think>
+
 INSTRUCTIONS:
 1. Create a single, concise line summarizing all key company details.
 2. Include industry, size, revenue, risks, and budget information.
@@ -56,6 +72,6 @@ INSTRUCTIONS:
 4. DO NOT include explanations, thinking, or multiple lines.
 
 Example FORMAT:
-Finance company with middle size company, $1M annual revenue, concerned about cyberattack, with $10K constraints.
+Finance company with medium size (120 employees), $5M annual revenue, concerned about cyberattacks and regulatory compliance, with $50K budget constraints.
 """
 )

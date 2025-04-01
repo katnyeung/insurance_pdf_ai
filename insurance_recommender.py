@@ -2,6 +2,9 @@ from langchain_ollama import OllamaLLM
 from langgraph.graph import Graph, START, END
 from prompts import question_refinement_template, recommendation_template, profile_template
 from langgraph.checkpoint.memory import MemorySaver
+from vector_search import document_retrieval, get_datasets
+import re
+from config import settings
 
 # Initialize the LLM
 llm = OllamaLLM(model="deepseek-r1:1.5b")
@@ -76,13 +79,62 @@ def generate_company_profile(state):
         state["company_profile"] = re.sub(r'<think>.*?</think>', '', company_profile, flags=re.DOTALL).strip()
     return state
 
+def retrieve_relevant_policies(state):
+    """Retrieve relevant policy information from RAGFlow using the company profile"""
+    company_profile = state.get("company_profile", "")
+    if not company_profile or company_profile == "No company information available.":
+        state["retrieved_chunks"] = []
+        state["policy_context"] = "No specific policy information available."
+        return state
+    
+    # Generate search query based on company profile
+    search_query = f"insurance policies for {company_profile}"
+    
+    # Get all available datasets
+    datasets = get_datasets()
+    dataset_ids = [d['id'] for d in datasets] if datasets else []
+    
+    if not dataset_ids:
+        print("Warning: No datasets found for retrieval")
+        state["retrieved_chunks"] = []
+        state["policy_context"] = "No datasets available for retrieval."
+        return state
+    
+    try:
+        # Retrieve relevant chunks from RAGFlow
+        chunks = document_retrieval(dataset_ids, search_query)
+        
+        # Store retrieved chunks in state
+        state["retrieved_chunks"] = chunks
+        
+        # Also build a formatted context string for the recommendation
+        policy_texts = []
+        for chunk in chunks:
+            content = chunk.get("content", "").strip()
+            source = chunk.get("source", "Unknown Policy")
+            if content:
+                policy_texts.append(f"Policy: {source}\nContent: {content}\n")
+        
+        state["policy_context"] = "\n".join(policy_texts) if policy_texts else "No specific policy information found."
+    except Exception as e:
+        print(f"Error retrieving policy information: {e}")
+        state["retrieved_chunks"] = []
+        state["policy_context"] = "Error retrieving policy information."
+    
+    return state
+
 def generate_recommendation(state):
     company_profile = state.get("company_profile", "\n".join(state.get("company_info", [])))
+    
+    # Use retrieved policy information if available, otherwise use generic text
+    policy_info = state.get("policy_context", "No specific policy information available.")
+    
     recommendation_chain = recommendation_template | llm
     recommendation = recommendation_chain.invoke({
         "company_profile": company_profile,
-        "relevant_policies": "Mock insurance policy data for demonstration purposes."
+        "relevant_policies": policy_info
     })
+    
     state["recommendation"] = recommendation
     return state
 
@@ -94,6 +146,7 @@ workflow.add_node("get_initial_input", get_initial_input)
 workflow.add_node("refine_question", refine_question)
 workflow.add_node("process_user_input", process_user_input)
 workflow.add_node("generate_company_profile", generate_company_profile)
+workflow.add_node("retrieve_relevant_policies", retrieve_relevant_policies)
 workflow.add_node("generate_recommendation", generate_recommendation)
 
 workflow.add_edge(START, "get_initial_input")
@@ -103,7 +156,9 @@ workflow.add_conditional_edges(
     lambda state: "generate_company_profile" if state.get("next_step") == "COMPLETE" else "process_user_input"
 )
 workflow.add_edge("process_user_input", "refine_question")
-workflow.add_edge("generate_company_profile", "generate_recommendation")
+workflow.add_edge("generate_company_profile", "retrieve_relevant_policies")
+workflow.add_edge("retrieve_relevant_policies", "generate_recommendation")
 workflow.add_edge("generate_recommendation", END)
 
+# Compile the workflow
 insurance_recommender = workflow.compile(checkpointer=checkpointer)
