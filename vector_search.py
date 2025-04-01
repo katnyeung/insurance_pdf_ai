@@ -2,7 +2,7 @@ import requests
 import uuid
 from config import settings
 
-def document_retrieval(dataset_ids, query, similarity_threshold=0.2, vector_similarity_weight=0.3, top_k=10):
+def document_retrieval(dataset_ids, query, similarity_threshold=0.3, vector_similarity_weight=0.5, top_k=15):
     """Retrieve relevant chunks from datasets based on a query"""
     url = f"{settings.RAGFLOW_API_URL}/api/v1/retrieval"
     headers = {
@@ -16,7 +16,8 @@ def document_retrieval(dataset_ids, query, similarity_threshold=0.2, vector_simi
         "similarity_threshold": similarity_threshold,
         "vector_similarity_weight": vector_similarity_weight,
         "top_k": top_k,
-        "highlight": True
+        "highlight": True,
+        "page_size": 200
     }
     
     try:

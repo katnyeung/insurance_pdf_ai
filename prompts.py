@@ -2,24 +2,22 @@ from langchain.prompts import PromptTemplate
 
 question_refinement_template = PromptTemplate(
     input_variables=["current_info", "missing_info"],
-    template="""Based on the following information about the company:
+    template="""steps by steps build up the information about the company, if user already mentioned in first answer, mark it as answered:
 {current_info}
 
-We still need to know:
+find out:
 {missing_info}
 
 INSTRUCTIONS:
-1. Select ONE specific missing information category to ask about.
-2. Generate a clear, direct question to gather that specific information.
-3. Keep your question concise and focused only on the selected category.
-4. Format your response as: "CATEGORY: [selected category]\nQUESTION: [your question]"
-5. Be confidence, no verification is required.
-
-For example:
-CATEGORY: Company size/employee count
-QUESTION: How many employees does your company currently have?
-
-Your response:"""
+0. return "COMPLETE" or "FINISHED" if you think you have all the information you needed and you can terminate early.
+1. Check if any missing information category from the list above.
+2. Ask a single direct question to gather this specific information.
+3. Keep your question concise and focused.
+4. DO NOT VERIFY, DO NOT CONFRIM or DO NOT ask more detail that already in {current_info}.
+5. Format your response exactly as:
+   CATEGORY: [category name]
+   QUESTION: [your question]
+6. Remember: You have only 5 attempts to gather all missing information. """
 )
 
 recommendation_template = PromptTemplate(
@@ -56,9 +54,8 @@ INSTRUCTIONS:
 2. Include industry, size, revenue, risks, and budget information.
 3. Format as a keyword-rich search query.
 4. DO NOT include explanations, thinking, or multiple lines.
-5. DO NOT use <think> tags or similar markers.
 
-OUTPUT FORMAT:
-[Industry] company with [size] employees, [revenue] annual revenue, concerned about [risks], with [budget] constraints.
+Example FORMAT:
+Finance company with middle size company, $1M annual revenue, concerned about cyberattack, with $10K constraints.
 """
 )
