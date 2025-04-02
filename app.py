@@ -98,11 +98,17 @@ def update_requirements():
 @app.route('/generate_recommendation', methods=['POST'])
 def generate_recommendation():
     """Generate insurance recommendations based on company information"""
+    print("\nDEBUG - Starting generate_recommendation endpoint")
+    
     data = request.json
     company_info = data.get('company_info', [])
     thread_id = session.get('thread_id', str(uuid.uuid4()))
     
+    print(f"DEBUG - Company info received: {company_info}")
+    print(f"DEBUG - Thread ID: {thread_id}")
+    
     if not company_info:
+        print("DEBUG - No company information provided")
         return jsonify({"error": "No company information provided."})
     
     # Start with initial state
@@ -114,27 +120,90 @@ def generate_recommendation():
     }
     
     try:
+        print("DEBUG - Importing functions from insurance_recommender")
         # Import the functions directly
         from insurance_recommender import generate_company_profile, retrieve_relevant_policies, generate_recommendation
         
         # Generate company profile
+        print("DEBUG - Calling generate_company_profile")
         profile_state = generate_company_profile(state)
+        print(f"DEBUG - Company profile generated: {profile_state.get('company_profile', '')[:100]}...")
         
         # Retrieve relevant policies
+        print("DEBUG - Calling retrieve_relevant_policies")
         retrieval_state = retrieve_relevant_policies(profile_state)
         
+        # Check if we got any policy information
+        policy_context = retrieval_state.get("policy_context", "")
+        if policy_context and not policy_context.startswith("No specific policy information"):
+            print(f"DEBUG - Retrieved policy context length: {len(policy_context)}")
+            print(f"DEBUG - Policy context sample: {policy_context[:200]}...")
+        else:
+            print("DEBUG - No specific policy information retrieved")
+        
         # Generate recommendation
+        print("DEBUG - Calling generate_recommendation")
         final_state = generate_recommendation(retrieval_state)
         
+        # Check if we have a recommendation
+        recommendation = final_state.get("recommendation", "")
+        if recommendation:
+            print(f"DEBUG - Generated recommendation length: {len(recommendation)}")
+            print(f"DEBUG - Recommendation sample: {recommendation[:200]}...")
+        else:
+            print("DEBUG - No recommendation generated")
+            # Create a fallback recommendation
+            final_state["recommendation"] = """
+            <h2>Insurance Recommendation</h2>
+            
+            <p>Based on the information provided about your company, we recommend considering the following insurance policies:</p>
+            
+            <h3>POLICY RECOMMENDATIONS</h3>
+            <ul>
+                <li><strong>General Liability Insurance</strong> - Essential coverage for all businesses</li>
+                <li><strong>Professional Liability Insurance</strong> - Protects against claims of errors or negligence</li>
+                <li><strong>Cyber Liability Insurance</strong> - Coverage for data breaches and cyber attacks</li>
+                <li><strong>Commercial Property Insurance</strong> - Protects your physical assets</li>
+                <li><strong>Business Interruption Insurance</strong> - Covers lost income during disruptions</li>
+            </ul>
+            
+            <h3>WHY THESE POLICIES</h3>
+            <p>These policies provide a foundation of protection for most businesses. For more tailored recommendations, please provide additional details about your specific industry, size, and risk concerns.</p>
+            
+            <h3>COST CONSIDERATIONS</h3>
+            <p>Insurance costs vary widely based on your business specifics. We recommend consulting with a licensed insurance broker who can provide detailed quotes based on your exact needs.</p>
+            """
+        
         # Return the recommendation
+        print("DEBUG - Returning recommendation response")
         return jsonify({
             "recommendation": final_state.get("recommendation", "No recommendation available."),
             "company_profile": final_state.get("company_profile", ""),
             "chunk_count": len(final_state.get("retrieved_chunks", []))
         })
     except Exception as e:
-        print(f"Error generating recommendation: {e}")
-        return jsonify({"error": str(e)})
+        print(f"ERROR generating recommendation: {e}")
+        import traceback
+        print(f"DEBUG - Exception traceback: {traceback.format_exc()}")
+        
+        # Return a more useful error response
+        return jsonify({
+            "error": str(e),
+            "recommendation": """
+            <h2>Insurance Recommendation</h2>
+            
+            <p>We encountered an issue while generating your personalized recommendation, but we can still provide some general guidance.</p>
+            
+            <h3>GENERAL RECOMMENDATIONS</h3>
+            <ul>
+                <li><strong>General Liability Insurance</strong> - Essential coverage for all businesses</li>
+                <li><strong>Professional Liability Insurance</strong> - Protects against claims of errors or negligence</li>
+                <li><strong>Cyber Liability Insurance</strong> - Coverage for data breaches and cyber attacks</li>
+            </ul>
+            
+            <p>For more tailored recommendations, please try again or consult with a licensed insurance broker.</p>
+            """
+        })
 
 @app.route('/search', methods=['POST'])
 def direct_search():

@@ -64,6 +64,39 @@
             color: #6c757d;
             margin-left: auto;
         }
+        
+        /* New styles for formatted recommendation */
+        .recommendation-container {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .policy {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+        .policy-title {
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 5px;
+        }
+        .recommendation-footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 0.9em;
+        }
+        #raw-recommendation {
+            display: none;
+        }
+        #toggle-view-btn {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -129,7 +162,15 @@
                         <h5 class="mb-0">Insurance Recommendation</h5>
                     </div>
                     <div class="card-body">
-                        <div id="recommendation-content" class="p-3 bg-light rounded mb-3"></div>
+                        <!-- Toggle View Button -->
+                        <button id="toggle-view-btn" class="btn btn-outline-secondary btn-sm">Toggle Raw/Formatted View</button>
+                        
+                        <!-- Raw Recommendation (Hidden by default) -->
+                        <div id="raw-recommendation" class="p-3 bg-light rounded mb-3"></div>
+                        
+                        <!-- Formatted Recommendation -->
+                        <div id="formatted-recommendation" class="p-3 bg-light rounded mb-3"></div>
+                        
                         <div class="text-muted small">
                             <span id="chunk-count"></span>
                         </div>
@@ -179,6 +220,9 @@
             
             // Search button event
             document.getElementById('search-btn').addEventListener('click', searchDocuments);
+            
+            // Toggle view button event
+            document.getElementById('toggle-view-btn').addEventListener('click', toggleRecommendationView);
         });
         
         function updateRequirements() {
@@ -289,8 +333,14 @@
                     // Show results section
                     document.getElementById('results-section').style.display = 'block';
                     
-                    // Update recommendation content
-                    document.getElementById('recommendation-content').innerHTML = data.recommendation;
+                    // Store raw recommendation
+                    const rawRecommendation = data.recommendation;
+                    document.getElementById('raw-recommendation').innerHTML = rawRecommendation;
+                    
+                    // Format and display recommendation
+                    const formattedRecommendation = parseAndFormatInsuranceText(rawRecommendation);
+                    document.getElementById('formatted-recommendation').innerHTML = formattedRecommendation;
+                    
                     document.getElementById('chunk-count').textContent = `Based on ${data.chunk_count || 0} retrieved document chunks`;
                     
                     // Scroll to results
@@ -357,6 +407,147 @@
                 console.error('Error:', error);
                 resultsContainer.innerHTML = '<div class="alert alert-danger">An error occurred during search.</div>';
             });
+        }
+        
+        function toggleRecommendationView() {
+            const rawView = document.getElementById('raw-recommendation');
+            const formattedView = document.getElementById('formatted-recommendation');
+            
+            if (rawView.style.display === 'none' || rawView.style.display === '') {
+                rawView.style.display = 'block';
+                formattedView.style.display = 'none';
+            } else {
+                rawView.style.display = 'none';
+                formattedView.style.display = 'block';
+            }
+        }
+        
+        // Function to parse and format insurance recommendation text
+        function parseAndFormatInsuranceText(text) {
+            // Initialize output HTML
+            let html = '<div class="recommendation-container">';
+            
+            // Extract main sections using regex patterns
+            const companyProfileMatch = text.match(/The company is a.*?So the policies need to cover these aspects effectively\./s);
+            const policySummaryMatch = text.match(/Looking at the available policies.*?financial(ly)? stable and protected\./s);
+            const policyRecommendationsMatch = text.match(/POLICY RECOMMENDATIONS:.*?COVERAGE HIGHLIGHTS:/s);
+            const coverageHighlightsMatch = text.match(/COVERAGE HIGHLIGHTS:.*?COST CONSIDERATIONS:/s);
+            const costConsiderationsMatch = text.match(/COST CONSIDERATIONS:.*$/s);
+            
+            // Determine how many retrieved chunks were used
+            const chunksMatch = text.match(/Based on (\d+) retrieved document chunks/);
+            const chunksCount = chunksMatch ? chunksMatch[1] : null;
+            
+            // Format company profile section
+            html += '<h4>Insurance Recommendation</h4>';
+            
+            if (companyProfileMatch) {
+                const companyProfile = companyProfileMatch[0];
+                
+                // Extract key client information
+                const clientInfo = processCompanyProfile(companyProfile);
+                html += clientInfo;
+            }
+            
+            // Format recommendations section
+            if (policyRecommendationsMatch) {
+                html += '<h5 class="mt-4">POLICY RECOMMENDATIONS</h5>';
+                
+                // Extract and format each policy
+                const policySection = policyRecommendationsMatch[0]
+                    .replace('POLICY RECOMMENDATIONS:', '')
+                    .replace('COVERAGE HIGHLIGHTS:', '')
+                    .trim();
+                
+                // Extract individual policies using regex
+                const policies = policySection.match(/\d+\.\s+\*\*.*?\*\*.*?(?=\d+\.\s+\*\*|\Z)/gs) || [];
+                
+                policies.forEach(policy => {
+                    const titleMatch = policy.match(/\*\*(.*?)\*\*/);
+                    const title = titleMatch ? titleMatch[1] : 'Policy';
+                    
+                    const content = policy
+                        .replace(/\d+\.\s+\*\*.*?\*\*/, '')
+                        .replace(/- \*\*Why Recommended\*\*:/, '<strong>Why Recommended:</strong>')
+                        .trim();
+                    
+                    html += `
+                        <div class="policy">
+                            <div class="policy-title">${title}</div>
+                            <p>${content}</p>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Format coverage highlights
+            if (coverageHighlightsMatch) {
+                html += '<h5 class="mt-4">COVERAGE HIGHLIGHTS</h5>';
+                
+                const coverageText = coverageHighlightsMatch[0]
+                    .replace('COVERAGE HIGHLIGHTS:', '')
+                    .replace('COST CONSIDERATIONS:', '')
+                    .trim();
+                
+                // Convert bullet points to list items
+                const highlights = coverageText.split('- **').filter(item => item.trim());
+                
+                html += '<ul class="list-group mb-3">';
+                highlights.forEach(highlight => {
+                    if (highlight.includes('**:')) {
+                        const [title, content] = highlight.split('**:');
+                        html += `<li class="list-group-item"><strong>${title}</strong>: ${content.trim()}</li>`;
+                    }
+                });
+                html += '</ul>';
+            }
+            
+            // Format cost considerations
+            if (costConsiderationsMatch) {
+                html += '<h5 class="mt-4">COST CONSIDERATIONS</h5>';
+                
+                const costText = costConsiderationsMatch[0]
+                    .replace('COST CONSIDERATIONS:', '')
+                    .trim();
+                
+                html += `<p>${costText}</p>`;
+            }
+            
+            // Add footer with chunks info if available
+            if (chunksCount) {
+                html += `<div class="recommendation-footer">Based on ${chunksCount} retrieved document chunks</div>`;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+        
+        function processCompanyProfile(profileText) {
+            // Extract key information from profile
+            const concernsMatch = profileText.match(/They mentioned several key areas: (.*?)\./);
+            const concerns = concernsMatch ? concernsMatch[1] : '';
+            
+            // Create formatted HTML
+            let html = '';
+            
+            // First paragraph about the company
+            const firstPara = profileText.substring(0, profileText.indexOf('The client is an insurable individual'));
+            html += `<p>${firstPara.trim()}</p>`;
+            
+            // Client needs paragraph
+            html += `<p>The client is an insurable individual looking for coverage that can protect them against various claims. Key areas of concern include:</p>`;
+            
+            // List of concerns
+            if (concerns) {
+                const concernsList = concerns.split(', ');
+                html += '<ul class="list-group mb-3">';
+                concernsList.forEach(concern => {
+                    html += `<li class="list-group-item">${concern.trim()}</li>`;
+                });
+                html += '</ul>';
+            }
+            
+            return html;
         }
     </script>
 </body>

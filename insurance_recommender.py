@@ -81,8 +81,15 @@ def generate_company_profile(state):
 
 def retrieve_relevant_policies(state):
     """Retrieve relevant policy information from RAGFlow using the company profile"""
+    print("\nDEBUG - Starting retrieve_relevant_policies function")
+    
+    # Log company info from state
+    print(f"DEBUG - Company info in state: {state.get('company_info', [])}")
+    
     company_profile = state.get("company_profile", "")
+    
     if not company_profile or company_profile == "No company information available.":
+        print("DEBUG - No company profile available")
         state["retrieved_chunks"] = []
         state["policy_context"] = "No specific policy information available."
         return state
@@ -90,34 +97,51 @@ def retrieve_relevant_policies(state):
     # Generate search query based on company profile
     search_query = f"insurance policies for {company_profile}"
     
-    # Get all available datasets
-    datasets = get_datasets()
-    dataset_ids = [d['id'] for d in datasets] if datasets else []
-    
-    if not dataset_ids:
-        print("Warning: No datasets found for retrieval")
-        state["retrieved_chunks"] = []
-        state["policy_context"] = "No datasets available for retrieval."
-        return state
-    
     try:
+        # Get all available datasets
+        datasets = get_datasets()
+        
+        # Extract dataset IDs
+        dataset_ids = []
+        
+        if datasets:
+            for dataset in datasets:
+                if isinstance(dataset, dict) and 'id' in dataset:
+                    dataset_ids.append(dataset['id'])
+                elif isinstance(dataset, str):
+                    dataset_ids.append(dataset)
+        
+        print(f"DEBUG - Final dataset_ids: {dataset_ids}")
+        
+        # If no datasets are found, return no results
+        if not dataset_ids:
+            print("WARNING: No datasets found for retrieval.")
+            state["retrieved_chunks"] = []
+            state["policy_context"] = "No policy information found. Please check if datasets are available."
+            return state
+        
         # Retrieve relevant chunks from RAGFlow
         chunks = document_retrieval(dataset_ids, search_query)
         
         # Store retrieved chunks in state
-        state["retrieved_chunks"] = chunks
+        state["retrieved_chunks"] = chunks if chunks else []
         
         # Also build a formatted context string for the recommendation
         policy_texts = []
-        for chunk in chunks:
-            content = chunk.get("content", "").strip()
-            source = chunk.get("source", "Unknown Policy")
-            if content:
-                policy_texts.append(f"Policy: {source}\nContent: {content}\n")
+        if chunks:
+            for chunk in chunks:
+                content = chunk.get("content", "").strip()
+                source = chunk.get("source", "Unknown Policy")
+                if content:
+                    policy_texts.append(f"Policy: {source}\nContent: {content}\n")
         
-        state["policy_context"] = "\n".join(policy_texts) if policy_texts else "No specific policy information found."
+        if policy_texts:
+            state["policy_context"] = "\n".join(policy_texts)
+        else:
+            state["policy_context"] = "No policy information found matching your company profile."
+        
     except Exception as e:
-        print(f"Error retrieving policy information: {e}")
+        print(f"ERROR retrieving policy information: {e}")
         state["retrieved_chunks"] = []
         state["policy_context"] = "Error retrieving policy information."
     
