@@ -95,7 +95,7 @@ def retrieve_relevant_policies(state):
         return state
     
     # Generate search query based on company profile
-    search_query = f"insurance policies for {company_profile}"
+    search_query = f"{company_profile}"
     
     try:
         # Get all available datasets

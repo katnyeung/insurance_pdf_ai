@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Insurance Recommendation System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
     <style>
         .requirement-container {
             background-color: #f8f9fa;
@@ -17,7 +18,7 @@
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 20px;
-            font-weight: bold;
+            font-weight: normal;
         }
         .requirement-status {
             display: flex;
@@ -64,38 +65,194 @@
             color: #6c757d;
             margin-left: auto;
         }
-        
-        /* New styles for formatted recommendation */
-        .recommendation-container {
-            font-family: Arial, sans-serif;
+
+        /* Markdown Styles */
+        /* Basic reset for markdown content */
+        .markdown-content {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            font-size: 16px;
             line-height: 1.6;
-            color: #333;
+            word-wrap: break-word;
         }
-        .policy {
-            margin-bottom: 15px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 4px solid #28a745;
+
+        /* Headings */
+        .markdown-content h1 {
+            font-size: 2em;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid #eaecef;
         }
-        .policy-title {
-            font-weight: bold;
-            color: #28a745;
-            margin-bottom: 5px;
+
+        .markdown-content h2 {
+            font-size: 1.5em;
+            margin-top: 1.25em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid #eaecef;
         }
-        .recommendation-footer {
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-            color: #666;
-            font-size: 0.9em;
+
+        .markdown-content h3 {
+            font-size: 1.25em;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
         }
-        #raw-recommendation {
-            display: none;
+
+        .markdown-content h4 {
+            font-size: 1em;
+            margin-top: 0.875em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
         }
-        #toggle-view-btn {
-            margin-top: 10px;
-            margin-bottom: 10px;
+
+        /* Paragraphs and text */
+        .markdown-content p {
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .markdown-content strong {
+            font-weight: 600;
+        }
+
+        .markdown-content em {
+            font-style: italic;
+        }
+
+        /* Lists */
+        .markdown-content ul,
+        .markdown-content ol {
+            padding-left: 2em;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .markdown-content ul ul,
+        .markdown-content ul ol,
+        .markdown-content ol ul,
+        .markdown-content ol ol {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .markdown-content li {
+            margin-bottom: 0.25em;
+        }
+
+        .markdown-content li + li {
+            margin-top: 0.25em;
+        }
+
+        /* Code blocks */
+        .markdown-content code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            background-color: rgba(27, 31, 35, 0.05);
+            border-radius: 3px;
+        }
+
+        .markdown-content pre {
+            margin-top: 0;
+            margin-bottom: 16px;
+            padding: 16px;
+            overflow: auto;
+            font-size: 85%;
+            line-height: 1.45;
+            background-color: #f6f8fa;
+            border-radius: 3px;
+        }
+
+        .markdown-content pre code {
+            display: block;
+            padding: 0;
+            margin: 0;
+            overflow: visible;
+            line-height: inherit;
+            word-wrap: normal;
+            background-color: transparent;
+            border: 0;
+        }
+
+        /* Blockquotes */
+        .markdown-content blockquote {
+            margin: 0 0 16px;
+            padding: 0 1em;
+            color: #6a737d;
+            border-left: 0.25em solid #dfe2e5;
+        }
+
+        .markdown-content blockquote > :first-child {
+            margin-top: 0;
+        }
+
+        .markdown-content blockquote > :last-child {
+            margin-bottom: 0;
+        }
+
+        /* Horizontal rules */
+        .markdown-content hr {
+            height: 0.25em;
+            margin: 24px 0;
+            background-color: #e1e4e8;
+            border: 0;
+        }
+
+        /* Tables */
+        .markdown-content table {
+            display: block;
+            width: 100%;
+            overflow: auto;
+            margin-top: 0;
+            margin-bottom: 16px;
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+
+        .markdown-content table th {
+            font-weight: 600;
+            padding: 6px 13px;
+            border: 1px solid #dfe2e5;
+            background-color: #f6f8fa;
+        }
+
+        .markdown-content table td {
+            padding: 6px 13px;
+            border: 1px solid #dfe2e5;
+        }
+
+        .markdown-content table tr {
+            background-color: #fff;
+            border-top: 1px solid #c6cbd1;
+        }
+
+        .markdown-content table tr:nth-child(2n) {
+            background-color: #f6f8fa;
+        }
+
+        /* Links */
+        .markdown-content a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+
+        .markdown-content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Images */
+        .markdown-content img {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Override the bootstrap card style for markdown content */
+        .card-body .markdown-content {
+            padding: 0;
         }
     </style>
 </head>
@@ -144,7 +301,7 @@
                         <!-- Requirements Preview -->
                         <div class="mb-3">
                             <label for="requirements-preview" class="form-label">Requirements Summary:</label>
-                            <div id="requirements-preview" class="preview-container">
+                            <div id="requirements-preview" class="preview-container markdown-content">
                                 No requirements provided yet.
                             </div>
                         </div>
@@ -162,15 +319,7 @@
                         <h5 class="mb-0">Insurance Recommendation</h5>
                     </div>
                     <div class="card-body">
-                        <!-- Toggle View Button -->
-                        <button id="toggle-view-btn" class="btn btn-outline-secondary btn-sm">Toggle Raw/Formatted View</button>
-                        
-                        <!-- Raw Recommendation (Hidden by default) -->
-                        <div id="raw-recommendation" class="p-3 bg-light rounded mb-3"></div>
-                        
-                        <!-- Formatted Recommendation -->
-                        <div id="formatted-recommendation" class="p-3 bg-light rounded mb-3"></div>
-                        
+                        <div id="recommendation-content" class="p-3 bg-light rounded mb-3 markdown-content"></div>
                         <div class="text-muted small">
                             <span id="chunk-count"></span>
                         </div>
@@ -197,6 +346,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <script>
         // Store the company information
         let companyInfo = [];
@@ -205,6 +356,24 @@
         let detectedCategories = [];
         
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize marked with GitHub Flavored Markdown options
+            if (window.marked) {
+                marked.use({
+                    gfm: true,
+                    breaks: true,
+                    headerIds: true,
+                    mangle: false,
+                    smartLists: true
+                });
+            }
+            
+            // Initialize highlight.js if loaded
+            if (window.hljs) {
+                hljs.configure({
+                    languages: ['javascript', 'python', 'bash', 'json']
+                });
+            }
+            
             // Update button event
             document.getElementById('update-btn').addEventListener('click', updateRequirements);
             
@@ -220,10 +389,31 @@
             
             // Search button event
             document.getElementById('search-btn').addEventListener('click', searchDocuments);
-            
-            // Toggle view button event
-            document.getElementById('toggle-view-btn').addEventListener('click', toggleRecommendationView);
         });
+        
+        // Function to render markdown content
+        function renderMarkdown(element, markdownText) {
+            if (!markdownText) return;
+            
+            if (window.marked) {
+                try {
+                    element.innerHTML = marked.parse(markdownText);
+                    
+                    // Apply syntax highlighting to code blocks if highlight.js is loaded
+                    if (window.hljs) {
+                        element.querySelectorAll('pre code').forEach((block) => {
+                            hljs.highlightElement(block);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error rendering markdown:', error);
+                    element.textContent = markdownText;
+                }
+            } else {
+                // Fallback if marked.js isn't loaded yet
+                element.textContent = markdownText;
+            }
+        }
         
         function updateRequirements() {
             if (attempts >= maxAttempts) {
@@ -269,10 +459,11 @@
                 updateCategoryBadges(detectedCategories);
                 
                 // Update next question
-                document.getElementById('current-question').textContent = data.next_question;
-                
-                // Update profile preview
-                document.getElementById('requirements-preview').textContent = data.profile;
+                renderMarkdown(document.getElementById('current-question'), data.next_question);
+
+                // Update profile preview with markdown rendering
+                const previewElement = document.getElementById('requirements-preview');
+                renderMarkdown(previewElement, data.profile);
                 
                 // Check if all required categories are collected or max attempts reached
                 if (data.completed || attempts >= maxAttempts) {
@@ -333,13 +524,9 @@
                     // Show results section
                     document.getElementById('results-section').style.display = 'block';
                     
-                    // Store raw recommendation
-                    const rawRecommendation = data.recommendation;
-                    document.getElementById('raw-recommendation').innerHTML = rawRecommendation;
-                    
-                    // Format and display recommendation
-                    const formattedRecommendation = parseAndFormatInsuranceText(rawRecommendation);
-                    document.getElementById('formatted-recommendation').innerHTML = formattedRecommendation;
+                    // Update recommendation content with markdown rendering
+                    const contentElement = document.getElementById('recommendation-content');
+                    renderMarkdown(contentElement, data.recommendation);
                     
                     document.getElementById('chunk-count').textContent = `Based on ${data.chunk_count || 0} retrieved document chunks`;
                     
@@ -384,11 +571,11 @@
                         const resultDiv = document.createElement('div');
                         resultDiv.className = 'result-item';
                         
-                        // Display highlighted content if available
+                        // If highlighted content exists, parse it as potential markdown
                         if (result.highlighted_content) {
-                            resultDiv.innerHTML = result.highlighted_content;
+                            renderMarkdown(resultDiv, result.highlighted_content);
                         } else {
-                            resultDiv.textContent = result.content;
+                            renderMarkdown(resultDiv, result.content);
                         }
                         
                         // Add source information
@@ -407,147 +594,6 @@
                 console.error('Error:', error);
                 resultsContainer.innerHTML = '<div class="alert alert-danger">An error occurred during search.</div>';
             });
-        }
-        
-        function toggleRecommendationView() {
-            const rawView = document.getElementById('raw-recommendation');
-            const formattedView = document.getElementById('formatted-recommendation');
-            
-            if (rawView.style.display === 'none' || rawView.style.display === '') {
-                rawView.style.display = 'block';
-                formattedView.style.display = 'none';
-            } else {
-                rawView.style.display = 'none';
-                formattedView.style.display = 'block';
-            }
-        }
-        
-        // Function to parse and format insurance recommendation text
-        function parseAndFormatInsuranceText(text) {
-            // Initialize output HTML
-            let html = '<div class="recommendation-container">';
-            
-            // Extract main sections using regex patterns
-            const companyProfileMatch = text.match(/The company is a.*?So the policies need to cover these aspects effectively\./s);
-            const policySummaryMatch = text.match(/Looking at the available policies.*?financial(ly)? stable and protected\./s);
-            const policyRecommendationsMatch = text.match(/POLICY RECOMMENDATIONS:.*?COVERAGE HIGHLIGHTS:/s);
-            const coverageHighlightsMatch = text.match(/COVERAGE HIGHLIGHTS:.*?COST CONSIDERATIONS:/s);
-            const costConsiderationsMatch = text.match(/COST CONSIDERATIONS:.*$/s);
-            
-            // Determine how many retrieved chunks were used
-            const chunksMatch = text.match(/Based on (\d+) retrieved document chunks/);
-            const chunksCount = chunksMatch ? chunksMatch[1] : null;
-            
-            // Format company profile section
-            html += '<h4>Insurance Recommendation</h4>';
-            
-            if (companyProfileMatch) {
-                const companyProfile = companyProfileMatch[0];
-                
-                // Extract key client information
-                const clientInfo = processCompanyProfile(companyProfile);
-                html += clientInfo;
-            }
-            
-            // Format recommendations section
-            if (policyRecommendationsMatch) {
-                html += '<h5 class="mt-4">POLICY RECOMMENDATIONS</h5>';
-                
-                // Extract and format each policy
-                const policySection = policyRecommendationsMatch[0]
-                    .replace('POLICY RECOMMENDATIONS:', '')
-                    .replace('COVERAGE HIGHLIGHTS:', '')
-                    .trim();
-                
-                // Extract individual policies using regex
-                const policies = policySection.match(/\d+\.\s+\*\*.*?\*\*.*?(?=\d+\.\s+\*\*|\Z)/gs) || [];
-                
-                policies.forEach(policy => {
-                    const titleMatch = policy.match(/\*\*(.*?)\*\*/);
-                    const title = titleMatch ? titleMatch[1] : 'Policy';
-                    
-                    const content = policy
-                        .replace(/\d+\.\s+\*\*.*?\*\*/, '')
-                        .replace(/- \*\*Why Recommended\*\*:/, '<strong>Why Recommended:</strong>')
-                        .trim();
-                    
-                    html += `
-                        <div class="policy">
-                            <div class="policy-title">${title}</div>
-                            <p>${content}</p>
-                        </div>
-                    `;
-                });
-            }
-            
-            // Format coverage highlights
-            if (coverageHighlightsMatch) {
-                html += '<h5 class="mt-4">COVERAGE HIGHLIGHTS</h5>';
-                
-                const coverageText = coverageHighlightsMatch[0]
-                    .replace('COVERAGE HIGHLIGHTS:', '')
-                    .replace('COST CONSIDERATIONS:', '')
-                    .trim();
-                
-                // Convert bullet points to list items
-                const highlights = coverageText.split('- **').filter(item => item.trim());
-                
-                html += '<ul class="list-group mb-3">';
-                highlights.forEach(highlight => {
-                    if (highlight.includes('**:')) {
-                        const [title, content] = highlight.split('**:');
-                        html += `<li class="list-group-item"><strong>${title}</strong>: ${content.trim()}</li>`;
-                    }
-                });
-                html += '</ul>';
-            }
-            
-            // Format cost considerations
-            if (costConsiderationsMatch) {
-                html += '<h5 class="mt-4">COST CONSIDERATIONS</h5>';
-                
-                const costText = costConsiderationsMatch[0]
-                    .replace('COST CONSIDERATIONS:', '')
-                    .trim();
-                
-                html += `<p>${costText}</p>`;
-            }
-            
-            // Add footer with chunks info if available
-            if (chunksCount) {
-                html += `<div class="recommendation-footer">Based on ${chunksCount} retrieved document chunks</div>`;
-            }
-            
-            html += '</div>';
-            return html;
-        }
-        
-        function processCompanyProfile(profileText) {
-            // Extract key information from profile
-            const concernsMatch = profileText.match(/They mentioned several key areas: (.*?)\./);
-            const concerns = concernsMatch ? concernsMatch[1] : '';
-            
-            // Create formatted HTML
-            let html = '';
-            
-            // First paragraph about the company
-            const firstPara = profileText.substring(0, profileText.indexOf('The client is an insurable individual'));
-            html += `<p>${firstPara.trim()}</p>`;
-            
-            // Client needs paragraph
-            html += `<p>The client is an insurable individual looking for coverage that can protect them against various claims. Key areas of concern include:</p>`;
-            
-            // List of concerns
-            if (concerns) {
-                const concernsList = concerns.split(', ');
-                html += '<ul class="list-group mb-3">';
-                concernsList.forEach(concern => {
-                    html += `<li class="list-group-item">${concern.trim()}</li>`;
-                });
-                html += '</ul>';
-            }
-            
-            return html;
         }
     </script>
 </body>

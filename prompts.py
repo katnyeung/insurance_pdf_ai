@@ -52,20 +52,16 @@ profile_template = PromptTemplate(
 Based on the following collected information about a company:
 {collected_info}
 
-<think>
 Analyze all the information provided and extract key details about:
 - Company size (employee count)
 - Industry/business type
 - Annual revenue
-- Risk profile/concerns
-- Budget constraints
+- Risk profile/concerns (if mentioned)
+- Budget constraints (if mentioned)
 - Country of the company (if mentioned)
 - Any special requirements like crypto coverage or grace period
 
-Make reasonable assumptions for missing information, noting them as assumptions.
-</think>
-
-INSTRUCTIONS:
+Your response must:
 1. Create a single, concise line summarizing all key company details.
 2. Include industry, size, revenue, risks, and budget information.
 3. Format as a keyword-rich search query.
