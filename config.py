@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     APP_DEBUG: bool = os.environ.get("APP_DEBUG", "True").lower() == "true"
     
     # LLM configuration
-    LLM_MODEL: str = os.environ.get("LLM_MODEL", "deepseek-r1:1.5b")
+    LLM_MODEL: str = os.environ.get("LLM_MODEL", "deepseek-r1:latest")
     LLM_API_BASE: str = os.environ.get("LLM_API_BASE", "http://localhost:11434")
     
     # Path configuration
