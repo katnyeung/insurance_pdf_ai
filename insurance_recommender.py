@@ -2,12 +2,12 @@ from langchain_ollama import OllamaLLM
 from langgraph.graph import Graph, START, END
 from prompts import question_refinement_template, recommendation_template, profile_template
 from langgraph.checkpoint.memory import MemorySaver
-from vector_search import document_retrieval, get_datasets
+from vector_search_neo4j import document_retrieval, get_datasets
 import re
 from config import settings
 
 # Initialize the LLM
-llm = OllamaLLM(model="deepseek-r1:1.5b")
+llm = OllamaLLM(model="deepseek-r1:latest")
 
 # Define all_categories globally
 ALL_CATEGORIES = [
@@ -39,12 +39,50 @@ def refine_question(state):
         state["next_step"] = "COMPLETE"
         return state
     
+    # Check if we have enough information to retrieve policies
+    if len(state.get("company_info", [])) > 0:
+        # Generate a temporary company profile for policy retrieval
+        current_info_text = "\n".join(state.get("company_info", []))
+        
+        # Create a temporary state for policy retrieval
+        temp_state = state.copy()
+        temp_state["company_profile"] = current_info_text
+        
+        # Retrieve relevant policies based on current information
+        temp_state = retrieve_relevant_policies(temp_state)
+        
+        # Get the number of retrieved chunks
+        retrieved_chunks = temp_state.get("retrieved_chunks", [])
+        num_chunks = len(retrieved_chunks)
+        print(f"DEBUG - retrieved_chunks {num_chunks}")
+        
+        # Store the retrieved chunks in the main state for future reference
+        state["retrieved_chunks"] = retrieved_chunks
+        
+        # If we have a sufficient number of relevant policies, move to recommendation
+        if num_chunks >= 400:  # Updated threshold to 600 chunks
+            state["next_step"] = "COMPLETE"
+            return state
+    
+    # If we don't have enough policies yet, continue gathering information
     missing_info = [cat for cat in ALL_CATEGORIES if cat not in state.get("collected_categories", [])]
     if not missing_info:
-        state["next_step"] = "COMPLETE"
+        # Even if we have all categories, we still need enough chunks
+        if state.get("retrieved_chunks", []) and len(state["retrieved_chunks"]) >= 600:
+            state["next_step"] = "COMPLETE"
+        else:
+            # We have all categories but not enough chunks, continue with more specific questions
+            state["next_step"] = "CONTINUE"
         return state
     
     current_info_text = "\n".join(state.get("company_info", [])) if state.get("company_info") else "No information yet."
+    
+    # Include information about retrieved policies if available
+    policy_context = ""
+    if "retrieved_chunks" in state and state["retrieved_chunks"]:
+        num_chunks = len(state["retrieved_chunks"])
+        policy_context = f"\nCurrently found {num_chunks} chunks. We need at least 600 chunk to make a recommendation."
+    
     missing_with_suggestions = [f"Note: You have a maximum of 5 attempts to gather missing information. This is attempt {state['question_attempts'] + 1}."]
     for cat in missing_info:
         options = ", ".join(SUGGESTED_ANSWERS[cat])
@@ -53,7 +91,8 @@ def refine_question(state):
     question_chain = question_refinement_template | llm
     state["next_question"] = question_chain.invoke({
         "current_info": current_info_text,
-        "missing_info": "\n".join(missing_with_suggestions)
+        "missing_info": "\n".join(missing_with_suggestions),
+        "policy_context": policy_context
     })
     state["question_attempts"] = state.get("question_attempts", 0) + 1
     return state

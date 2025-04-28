@@ -66,6 +66,85 @@
             margin-left: auto;
         }
 
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #e9ecef;
+            z-index: 1;
+        }
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+        }
+        .step.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .step.completed {
+            background-color: #28a745;
+            color: white;
+        }
+        .step-label {
+            position: absolute;
+            top: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .step.active .step-label {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+        .step.completed .step-label {
+            color: #28a745;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
+        }
+        .loading-text {
+            font-size: 1.2rem;
+            color: #0d6efd;
+        }
+
         /* Markdown Styles */
         /* Basic reset for markdown content */
         .markdown-content {
@@ -198,6 +277,7 @@
         .markdown-content hr {
             height: 0.25em;
             margin: 24px 0;
+            padding: 0;
             background-color: #e1e4e8;
             border: 0;
         }
@@ -215,11 +295,9 @@
 
         .markdown-content table th {
             font-weight: 600;
-            padding: 6px 13px;
-            border: 1px solid #dfe2e5;
-            background-color: #f6f8fa;
         }
 
+        .markdown-content table th,
         .markdown-content table td {
             padding: 6px 13px;
             border: 1px solid #dfe2e5;
@@ -258,46 +336,74 @@
     </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container py-4">
         <h1 class="text-center mb-4">Insurance Recommendation System</h1>
         
+        <!-- Progress Steps -->
+        <div class="progress-steps mb-4">
+            <div class="step active" id="step-1">
+                <span>1</span>
+                <span class="step-label">Input</span>
+            </div>
+            <div class="step" id="step-2">
+                <span>2</span>
+                <span class="step-label">Analysis</span>
+            </div>
+            <div class="step" id="step-3">
+                <span>3</span>
+                <span class="step-label">Recommendation</span>
+            </div>
+        </div>
+        
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="spinner-border loading-spinner text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="loading-text" id="loading-text">Processing your request...</div>
+        </div>
+        
         <div class="row">
-            <div class="col-md-10 mx-auto">
-                <!-- Requirements Gathering Section -->
+            <div class="col-md-8 mx-auto">
+                <!-- Input Section -->
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Company Requirements Gathering</h5>
+                        <h5 class="mb-0">Company Information</h5>
                     </div>
                     <div class="card-body">
-                        <!-- Requirement Status -->
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="mb-0">Required Information:</h6>
-                            <span id="attempt-counter" class="attempt-counter">Attempts: 0/5</span>
-                        </div>
-                        
-                        <div class="requirement-status mb-3">
-                            <span id="category-Company-size-employee-count" class="badge-required">Company Size</span>
-                            <span id="category-Industry-business-type" class="badge-required">Industry</span>
-                            <span id="category-Annual-revenue" class="badge-required">Revenue</span>
-                            <span id="category-Risk-profile-concerns" class="badge-required">Risk Profile</span>
-                            <span id="category-Budget-constraints" class="badge-required">Budget</span>
-                            <span id="category-Country-of-the-company" class="badge-optional">Country</span>
-                            <span id="category-Crypto-coverage-needs" class="badge-optional">Crypto</span>
-                            <span id="category-Preferred-grace-period-days-for-new-subsidiary-cover" class="badge-optional">Grace Period</span>
-                        </div>
-
-                        <!-- Current Question -->
-                        <div id="current-question" class="question-container">
-                            Please provide information about your company. We need details such as company size, industry, annual revenue, risk concerns, and budget constraints.
-                        </div>
-                        
-                        <!-- Requirements Input -->
                         <div class="mb-3">
-                            <label for="requirements-input" class="form-label">Your Input:</label>
-                            <textarea id="requirements-input" class="form-control" rows="3" placeholder="Example: We are a small tech company with 30 employees, $2M annual revenue, concerned about cyber attacks, with a $15K budget for insurance."></textarea>
+                            <label for="requirements-input" class="form-label">Enter information about your company:</label>
+                            <textarea id="requirements-input" class="form-control" rows="3" placeholder="Example: We are a medium-sized technology company with 120 employees and $5M annual revenue. We're concerned about cyberattacks and regulatory compliance."></textarea>
+                            <div class="form-text">Press Ctrl+Enter to submit</div>
                         </div>
                         
-                        <button id="update-btn" class="btn btn-primary mb-3">Update Requirements</button>
+                        <!-- Current Question -->
+                        <div class="question-container mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Current Question:</h6>
+                                <span class="attempt-counter" id="attempt-counter">Attempts: 0/5</span>
+                            </div>
+                            <div id="current-question" class="p-2 bg-light rounded">
+                                Please provide information about your company, including size, industry, revenue, and any specific concerns.
+                            </div>
+                        </div>
+                        
+                        <!-- Category Status -->
+                        <div class="requirement-status mb-3">
+                            <div id="category-company-size" class="badge-required">Company size/employee count</div>
+                            <div id="category-industry" class="badge-required">Industry/business type</div>
+                            <div id="category-annual-revenue" class="badge-required">Annual revenue</div>
+                            <div id="category-risk-profile" class="badge-required">Risk profile/concerns</div>
+                            <div id="category-budget-constraints" class="badge-required">Budget constraints</div>
+                            <div id="category-country" class="badge-required">Country of the company</div>
+                            <div id="category-crypto-coverage" class="badge-optional">Crypto coverage needs</div>
+                            <div id="category-grace-period" class="badge-optional">Preferred grace period</div>
+                        </div>
+                        
+                        <button id="update-btn" class="btn btn-primary mb-3">
+                            <span class="spinner-border spinner-border-sm d-none" id="update-spinner" role="status" aria-hidden="true"></span>
+                            Update Requirements
+                        </button>
                         
                         <!-- Requirements Preview -->
                         <div class="mb-3">
@@ -335,7 +441,10 @@
                     <div class="card-body">
                         <div class="input-group mb-3">
                             <input type="text" id="search-input" class="form-control" placeholder="Search for specific policies...">
-                            <button id="search-btn" class="btn btn-secondary">Search</button>
+                            <button id="search-btn" class="btn btn-secondary">
+                                <span class="spinner-border spinner-border-sm d-none" id="search-spinner" role="status" aria-hidden="true"></span>
+                                Search
+                            </button>
                         </div>
                         <div id="search-results">
                             <!-- Search results will appear here -->
@@ -416,6 +525,33 @@
             }
         }
         
+        // Function to show loading overlay
+        function showLoading(message) {
+            document.getElementById('loading-text').textContent = message;
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+        
+        // Function to hide loading overlay
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+        
+        // Function to update progress steps
+        function updateProgressSteps(step) {
+            // Reset all steps
+            document.querySelectorAll('.step').forEach(el => {
+                el.classList.remove('active', 'completed');
+            });
+            
+            // Mark completed steps
+            for (let i = 1; i < step; i++) {
+                document.getElementById(`step-${i}`).classList.add('completed');
+            }
+            
+            // Mark current step
+            document.getElementById(`step-${step}`).classList.add('active');
+        }
+        
         function updateRequirements() {
             if (attempts >= maxAttempts) {
                 alert("You've reached the maximum number of attempts. Please generate a recommendation with the current information.");
@@ -427,6 +563,12 @@
                 alert("Please provide some information about your company.");
                 return;
             }
+            
+            // Show loading state on button
+            const updateBtn = document.getElementById('update-btn');
+            const updateSpinner = document.getElementById('update-spinner');
+            updateBtn.disabled = true;
+            updateSpinner.classList.remove('d-none');
             
             // Increment attempt counter
             attempts++;
@@ -448,6 +590,10 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Restore button state
+                updateBtn.disabled = false;
+                updateSpinner.classList.add('d-none');
+                
                 if (data.error) {
                     alert(data.error);
                     return;
@@ -469,6 +615,7 @@
                 // Check if all required categories are collected or max attempts reached
                 if (data.completed || attempts >= maxAttempts) {
                     document.getElementById('recommend-btn').disabled = false;
+                    updateProgressSteps(2); // Move to analysis step
                 }
                 
                 // Clear input field
@@ -477,6 +624,10 @@
             .catch(error => {
                 console.error('Error:', error);
                 alert('An error occurred while updating requirements.');
+                
+                // Restore button state
+                updateBtn.disabled = false;
+                updateSpinner.classList.add('d-none');
             });
         }
         
@@ -504,8 +655,15 @@
             }
             
             // Show loading state
-            document.getElementById('recommend-btn').disabled = true;
-            document.getElementById('recommend-btn').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+            const recommendBtn = document.getElementById('recommend-btn');
+            recommendBtn.disabled = true;
+            recommendBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
+            
+            // Show loading overlay
+            showLoading("Generating insurance recommendation...");
+            
+            // Update progress steps
+            updateProgressSteps(3);
             
             // Send company info to server
             fetch('/generate_recommendation', {
@@ -517,9 +675,12 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Hide loading overlay
+                hideLoading();
+                
                 // Restore button state
-                document.getElementById('recommend-btn').disabled = false;
-                document.getElementById('recommend-btn').textContent = 'Generate Insurance Recommendation';
+                recommendBtn.disabled = false;
+                recommendBtn.textContent = 'Generate Insurance Recommendation';
                 
                 if (data.recommendation) {
                     // Show results section
@@ -539,8 +700,9 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('recommend-btn').disabled = false;
-                document.getElementById('recommend-btn').textContent = 'Generate Insurance Recommendation';
+                hideLoading();
+                recommendBtn.disabled = false;
+                recommendBtn.textContent = 'Generate Insurance Recommendation';
                 alert('An error occurred while generating the recommendation. Please try again.');
             });
         }
@@ -548,12 +710,17 @@
         function searchDocuments() {
             const query = document.getElementById('search-input').value.trim();
             const resultsContainer = document.getElementById('search-results');
+            const searchBtn = document.getElementById('search-btn');
+            const searchSpinner = document.getElementById('search-spinner');
             
             if (query === '') {
                 resultsContainer.innerHTML = '<div class="alert alert-warning">Please enter a search query.</div>';
                 return;
             }
             
+            // Show loading state
+            searchBtn.disabled = true;
+            searchSpinner.classList.remove('d-none');
             resultsContainer.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>';
             
             fetch('/search', {
@@ -565,6 +732,10 @@
             })
             .then(response => response.json())
             .then(data => {
+                // Restore button state
+                searchBtn.disabled = false;
+                searchSpinner.classList.add('d-none');
+                
                 resultsContainer.innerHTML = '';
                 
                 if (data.results && data.results.length > 0) {
@@ -593,6 +764,8 @@
             })
             .catch(error => {
                 console.error('Error:', error);
+                searchBtn.disabled = false;
+                searchSpinner.classList.add('d-none');
                 resultsContainer.innerHTML = '<div class="alert alert-danger">An error occurred during search.</div>';
             });
         }
