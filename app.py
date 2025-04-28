@@ -4,7 +4,7 @@ import os
 from insurance_recommender import insurance_recommender, ALL_CATEGORIES, SUGGESTED_ANSWERS
 from prompts import profile_template
 from langchain_ollama import OllamaLLM
-from vector_search import document_retrieval, get_datasets
+from vector_search_neo4j import document_retrieval, get_datasets
 from config import settings
 
 app = Flask(__name__)

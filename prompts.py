@@ -1,12 +1,14 @@
 from langchain.prompts import PromptTemplate
 
 question_refinement_template = PromptTemplate(
-    input_variables=["current_info", "missing_info"],
+    input_variables=["current_info", "missing_info", "policy_context"],
     template="""steps by steps build up the information about the company, if user already mentioned in first answer, mark it as answered:
 {current_info}
 
 find out:
 {missing_info}
+
+{policy_context}
 
 INSTRUCTIONS:
 0. return "COMPLETE" or "FINISHED" if you think you have all the information you needed and you can terminate early.
@@ -43,7 +45,7 @@ Your response must include:
 
 Keep your response concise and focused on actionable recommendations. Avoid lengthy explanations of policy details unless directly relevant to the client's needs.
 
-Format your response in well-structured HTML with clear headings and bullet points for readability."""
+Format your response in well-structured Mark down format with clear headings and bullet points for readability."""
 )
     
 profile_template = PromptTemplate(
