@@ -1,0 +1,8 @@
+:START_ID(Policy),:END_ID(Exclusion),:TYPE
+pol_chubb_672aec9c,ex_pol_chubb_672aec9c_05fddbc4,HAS_EXCLUSION
+pol_allianz(agcs)_63eaac4d,ex_pol_allianz(agcs)_63eaac4d_8aff342c,HAS_EXCLUSION
+pol_qbe_f4a74bc3,ex_pol_qbe_f4a74bc3_20ffd264,HAS_EXCLUSION
+pol_liberty_1805efbe,ex_pol_liberty_1805efbe_44c1a5f8,HAS_EXCLUSION
+pol_liberty_1805efbe,ex_pol_liberty_1805efbe_5d068f36,HAS_EXCLUSION
+pol_aig_dc5dd427,ex_pol_aig_dc5dd427_285d2216,HAS_EXCLUSION
+pol_unknown_27bc5d83,ex_pol_unknown_27bc5d83_fc87719b,HAS_EXCLUSION

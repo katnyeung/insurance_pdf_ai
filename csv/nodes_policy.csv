@@ -1,0 +1,7 @@
+policyId:ID(Policy),insurer,policyName,fileName,jurisdiction,versionDate,:LABEL
+pol_chubb_672aec9c,Chubb,Chubb Elite V DO Policy v HK Aug 2016,Chubb Elite V DO Policy v HK Aug 2016.pdf.md,Hong Kong SAR,,Policy
+pol_allianz(agcs)_63eaac4d,Allianz (AGCS),AGCS D-O Protect 8 2015 HK 042016 Clean 26022017 (updated 2021.02.03),AGCS D-O Protect 8 2015 HK 042016 Clean 26022017 (updated 2021.02.03).pdf.md,Hong Kong SAR,,Policy
+pol_qbe_f4a74bc3,QBE,QBE Commercial management liability insurance policy - DOLCML001-Q-0416_HK_,QBE Commercial management liability insurance policy - DOLCML001-Q-0416_HK_.pdf.md,Hong Kong SAR,,Policy
+pol_liberty_1805efbe,Liberty,Liberty HK D&O Specimen Wording (11-17),Liberty HK D&O Specimen Wording (11-17).md,Hong Kong SAR,,Policy
+pol_aig_dc5dd427,AIG,Dragonshield Policy 2015 - with COP,Dragonshield Policy 2015 - with COP.pdf.md,Hong Kong SAR,,Policy
+pol_unknown_27bc5d83,Unknown,D&O Policy for Public Companies 2015 - with schedule,D&O Policy for Public Companies 2015 - with schedule.pdf.md,Hong Kong SAR,,Policy

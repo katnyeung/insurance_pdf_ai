@@ -1,0 +1,8 @@
+exclusionId:ID(Exclusion),exclusionText,exclusionType,:LABEL
+ex_pol_chubb_672aec9c_05fddbc4,The Insurer shall not be liable to make any payment for Loss under this Policy:,General,Exclusion
+ex_pol_allianz(agcs)_63eaac4d_8aff342c,The Insurer shall not be liable for any Loss:,General,Exclusion
+ex_pol_qbe_f4a74bc3_20ffd264,"The conduct of any insured person will not be imputed to another insured person to determine the application of any of the following Exclusions. QBE will have no liability to make payments in connection with a claim, or under any of the Extensions of this policy:",General,Exclusion
+ex_pol_liberty_1805efbe_44c1a5f8,|4.1 ERISA|7| |---|---| |4.2 Fraud & Dishonesty|7| |4.3 Future Offering of Securities|8| |4.4 North America: Company versus Insured|8| |4.5 Prior Matters|8| |4.6 Personal Injury & Property Damage|8|,General,Exclusion
+ex_pol_liberty_1805efbe_5d068f36,Liberty will not pay for any Loss or any other amount insured under this Policy:,General,Exclusion
+ex_pol_aig_dc5dd427_285d2216,The Insurer shall not be liable under this policy to make any payment:,General,Exclusion
+ex_pol_unknown_27bc5d83_fc87719b,The Insurer shall not be liable under this Policy to make any payment:,General,Exclusion
